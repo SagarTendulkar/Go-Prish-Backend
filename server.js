@@ -24,6 +24,7 @@ const wishlistRoutes = require("./routes/wishlistRoutes");
 const authRoutes = require("./routes/authRoutes");
 const categoryRoutes = require("./routes/categoryRoutes");
 const adminRoutes = require("./routes/adminRoutes")
+const paymentRoutes = require("./routes/paymentRoutes");
 
 // Use routes
 app.use("/api/products", productRoutes);
@@ -33,6 +34,7 @@ app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/payment", paymentRoutes)
 
 
 // Test route
