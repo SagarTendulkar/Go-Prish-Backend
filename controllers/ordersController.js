@@ -11,24 +11,6 @@ const createOrder = async (req, res) => {
         const order = new Order({ userId, name, email, phone, address, cart, totalAmount });
         const savedOrder = await order.save();
 
-        // 2️⃣ Update product stock
-        for (const item of cart) {
-            const product = await Product.findById(item.productId);
-            if (!product) continue;
-
-
-            product.variants.forEach((variant) => {
-                if (variant.colorCode === item.color) { // 👈 make sure to match by colorCode
-                    variant.sizes.forEach((sizeObj) => {
-                        if (sizeObj.size === item.size) {
-                            sizeObj.countInStock = Math.max(0, sizeObj.countInStock - item.qty);
-                        }
-                    });
-                }
-            });
-
-            await product.save();
-        }
 
         res.status(201).json({
             message: "Order placed successfully & stock updated",

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const razorpay = require("../utils/razorpay");
+const { verifyPaymentAndCreateOrder } = require("../controllers/paymentController");
 
 router.post("/create-order", async (req, res) => {
     try {
@@ -20,5 +21,7 @@ router.post("/create-order", async (req, res) => {
         res.status(500).send("Razorpay order failed");
     }
 });
+
+router.post("/verify", verifyPaymentAndCreateOrder)
 
 module.exports = router;
