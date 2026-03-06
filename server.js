@@ -16,7 +16,7 @@ const app = express();
 app.use(cors());
 app.use(express.json()); // Parse JSON request bodies
 
-// Import product routes
+// Import routes
 const productRoutes = require("./routes/productRoutes");
 const cartRoutes = require("./routes/cartRoutes");
 const orderRoutes = require("./routes/orderRoutes");

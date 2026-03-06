@@ -12,6 +12,14 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             orderData,
         } = req.body;
 
+        if (req.user.email === "demo@goprish.com") {
+            return res.status(200).json({
+                success: true,
+                demo: true,
+                message: "Demo mode: Order placement disabled."
+            });
+        }
+
         // STEP 1: generate expected signature
         const body = razorpay_order_id + "|" + razorpay_payment_id;
 
