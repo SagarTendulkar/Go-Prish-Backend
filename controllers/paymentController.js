@@ -1,7 +1,7 @@
 const crypto = require("crypto");
-const Order = require("../models/orderModal"); // your order model
-const Cart = require("../models/cart")
-const Product = require("../models/product")
+const Order = require("../models/orderModal");
+const Cart = require("../models/cart");
+const Product = require("../models/product");
 
 exports.verifyPaymentAndCreateOrder = async (req, res) => {
     try {
@@ -12,15 +12,22 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             orderData,
         } = req.body;
 
-        if (req.user.email === "demo@goprish.com") {
-            return res.status(200).json({
-                success: true,
-                demo: true,
-                message: "Demo mode: Order placement disabled."
+        // ✅ VALIDATION
+        if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
+            return res.status(400).json({
+                success: false,
+                message: "Missing payment details",
             });
         }
 
-        // STEP 1: generate expected signature
+        if (!orderData || !orderData.cart || !orderData.cart.length) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid order data",
+            });
+        }
+
+        // 🔐 SIGNATURE VERIFY
         const body = razorpay_order_id + "|" + razorpay_payment_id;
 
         const expectedSignature = crypto
@@ -28,7 +35,6 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             .update(body)
             .digest("hex");
 
-        // STEP 2: compare signatures
         if (expectedSignature !== razorpay_signature) {
             return res.status(400).json({
                 success: false,
@@ -36,7 +42,7 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             });
         }
 
-        // STEP 3: payment verified → create order
+        // 📦 CREATE ORDER
         const newOrder = new Order({
             ...orderData,
             paymentId: razorpay_payment_id,
@@ -44,9 +50,10 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             orderStatus: "Placed",
         });
 
-        // Check and Update stock
+        // 🛒 STOCK UPDATE
         for (const item of orderData.cart) {
-            const product = await Product.findById(item.productId)
+            const product = await Product.findById(item.productId);
+
             if (!product) {
                 return res.status(404).json({
                     success: false,
@@ -56,19 +63,18 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
 
             let stockAvailable = false;
 
-            product.variants.forEach((variant) => {
+            for (const variant of product.variants) {
                 if (variant.colorCode === item.color) {
-                    variant.sizes.forEach((sizeObj) => {
+                    for (const sizeObj of variant.sizes) {
                         if (sizeObj.size === item.size) {
-
                             if (sizeObj.countInStock >= item.qty) {
                                 sizeObj.countInStock -= item.qty;
                                 stockAvailable = true;
                             }
                         }
-                    });
+                    }
                 }
-            });
+            }
 
             if (!stockAvailable) {
                 return res.status(400).json({
@@ -76,12 +82,14 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
                     message: `${item.name} (${item.size}) is out of stock`,
                 });
             }
-            await product.save();
+
+            await product.save({ validateBeforeSave: false });
         }
 
+        // 💾 SAVE ORDER
         await newOrder.save();
 
-        // clear user cart 
+        // 🧹 CLEAR CART
         await Cart.findOneAndUpdate(
             { userId: orderData.userId },
             { $set: { products: [] } }
@@ -94,7 +102,12 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("VERIFY ERROR:", error);
-        res.status(500).json({ success: false, message: "Server error" });
+        console.error("🔥 VERIFY ERROR:", error.message);
+        console.error(error.stack);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Server error",
+        });
     }
 };
