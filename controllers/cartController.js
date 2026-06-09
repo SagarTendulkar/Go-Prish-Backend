@@ -3,7 +3,8 @@ const Product = require("../models/product");
 
 // ➕ Add to Cart 
 const addToCart = async (req, res) => {
-    const { userId, productId, size, color } = req.body;
+    const userId = req.user.id;
+    const { productId, size, color } = req.body;
 
     try {
         const product = await Product.findById(productId);
@@ -54,7 +55,8 @@ const addToCart = async (req, res) => {
 
 // 🗑 Remove from Cart
 const removeFromCart = async (req, res) => {
-    const { userId, productId } = req.body;
+    const userId = req.user.id;
+    const { productId } = req.body;
     try {
         const cart = await Cart.findOne({ userId });
         if (!cart) return res.status(404).json({ message: "Cart not found" });
@@ -71,7 +73,7 @@ const removeFromCart = async (req, res) => {
 
 // 🧹 Clear Cart (after successful order)
 const clearCart = async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user.id;
     try {
         const cart = await Cart.findOne({ userId });
         if (!cart) return res.status(404).json({ message: "Cart not found" });
@@ -87,7 +89,7 @@ const clearCart = async (req, res) => {
 
 // 📦 Get Cart Items
 const getCart = async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user.id;
     try {
         const cart = await Cart.findOne({ userId });
         res.json(cart || { userId, products: [] });

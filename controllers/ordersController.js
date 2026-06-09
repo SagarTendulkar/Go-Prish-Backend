@@ -4,7 +4,8 @@ const Order = require("../models/orderModal");
 const Category = require("../models/category");
 
 const createOrder = async (req, res) => {
-    const { userId, name, email, phone, address, cart, totalAmount } = req.body;
+    const userId = req.user.id; // ✅ from JWT
+    const { name, email, phone, address, cart, totalAmount } = req.body;
 
     try {
         // 1️⃣ Create and save order
@@ -25,9 +26,9 @@ const createOrder = async (req, res) => {
 
 
 const getOrdersByUserId = async (req, res) => {
-    const { id } = req.params;
+    const userId = req.user.id;
     try {
-        const orders = await Order.find({ userId: id }).sort({ createdAt: -1 });
+        const orders = await Order.find({ userId }).sort({ createdAt: -1 });
         if (!orders.length)
             return res.status(404).json({ message: "No orders found for this user" });
         res.json(orders);
@@ -80,7 +81,8 @@ const getAdminStats = async (req, res) => {
         const salesByMonth = await Order.aggregate([
             {
                 $group: {
-                    _id: { $substr: ["$createdAt", 0, 7] }, // YYYY-MM
+                    // _id: { $substr: ["$createdAt", 0, 7] }, // YYYY-MM
+                    _id: { $dateToString: { format: "%Y-%m", date: "$createdAt" } },
                     totalSales: { $sum: "$totalAmount" },
                 },
             },

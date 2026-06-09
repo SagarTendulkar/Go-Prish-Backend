@@ -26,6 +26,9 @@ const orderSchema = new mongoose.Schema({
         type: String,
         default: "Pending",
     },
+    paymentMethod: { type: String, default: "COD" },   // ✅ "COD" | "Razorpay"
+    paymentStatus: { type: String, default: "Pending" }, // ✅ "Pending" | "Paid"
+    paymentId: { type: String, default: null },          // ✅ Razorpay payment ID
 },
     { timestamps: true }
 );
