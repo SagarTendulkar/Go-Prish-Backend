@@ -1,3 +1,7 @@
+// ✅ debug — remove after fixing
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "exists" : "missing");
+
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
