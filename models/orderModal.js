@@ -15,6 +15,7 @@ const orderSchema = new mongoose.Schema({
             productId: mongoose.Schema.Types.ObjectId,
             name: String,
             color: String,
+            colorName: String,
             size: String,
             price: Number,
             qty: Number,
@@ -24,7 +25,7 @@ const orderSchema = new mongoose.Schema({
     totalAmount: Number,
     status: {
         type: String,
-        default: "Pending",
+        default: "Processing",
     },
     paymentMethod: { type: String, default: "COD" },   // ✅ "COD" | "Razorpay"
     paymentStatus: { type: String, default: "Pending" }, // ✅ "Pending" | "Paid"

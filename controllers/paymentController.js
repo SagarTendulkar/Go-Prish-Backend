@@ -49,7 +49,8 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             ...orderData,
             paymentId: razorpay_payment_id,
             paymentStatus: "Paid",
-            orderStatus: "Placed",
+            paymentMethod: "Razorpay",
+            status: "Processing",
         });
 
         // 🛒 STOCK UPDATE

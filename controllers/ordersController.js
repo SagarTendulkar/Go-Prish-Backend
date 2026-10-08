@@ -5,12 +5,17 @@ const Category = require("../models/category");
 const sendOrderConfirmationEmail = require("../utils/orderConfirmationEmail");
 
 const createOrder = async (req, res) => {
-    const userId = req.user.id; // ✅ from JWT
+    const userId = req.user.id;
     const { name, email, phone, address, cart, totalAmount } = req.body;
 
     try {
         // 1️⃣ Create and save order
-        const order = new Order({ userId, name, email, phone, address, cart, totalAmount });
+        const order = new Order({
+            userId, name, email, phone, address, cart, totalAmount,
+            paymentMethod: "COD",
+            paymentStatus: "Pending",
+            status: "Processing",
+        });
         const savedOrder = await order.save();
 
         // 2️⃣ Send order confirmation email
@@ -25,7 +30,7 @@ const createOrder = async (req, res) => {
         }
 
         res.status(201).json({
-            message: "Order placed successfully & stock updated",
+            message: "Order placed successfully",
             order: savedOrder,
         });
     } catch (error) {
@@ -33,8 +38,6 @@ const createOrder = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
-
 
 const getOrdersByUserId = async (req, res) => {
     const userId = req.user.id;
