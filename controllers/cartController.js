@@ -4,7 +4,7 @@ const Product = require("../models/product");
 // ➕ Add to Cart 
 const addToCart = async (req, res) => {
     const userId = req.user.id;
-    const { productId, size, color } = req.body;
+    const { productId, size, color, colorName } = req.body;
 
     try {
         const product = await Product.findById(productId);
@@ -22,6 +22,7 @@ const addToCart = async (req, res) => {
             qty: 1,
             size,
             color,
+            colorName: colorName || color,
         };
 
         // If user has no cart yet, create new one

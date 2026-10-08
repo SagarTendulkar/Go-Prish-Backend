@@ -2,6 +2,8 @@ const crypto = require("crypto");
 const Order = require("../models/orderModal");
 const Cart = require("../models/cart");
 const Product = require("../models/product");
+const sendEmail = require("../utils/sendEmail");
+const sendOrderConfirmationEmail = require("../utils/orderConfirmationEmail");
 
 exports.verifyPaymentAndCreateOrder = async (req, res) => {
     try {
@@ -94,6 +96,22 @@ exports.verifyPaymentAndCreateOrder = async (req, res) => {
             { userId: orderData.userId },
             { $set: { products: [] } }
         );
+
+        // 📧 SEND ORDER CONFIRMATION EMAIL
+        try {
+            await sendOrderConfirmationEmail({
+                order: newOrder,
+                name: orderData.name,
+                email: orderData.email,
+                phone: orderData.phone,
+                address: orderData.address,
+                cart: orderData.cart,
+                totalAmount: orderData.totalAmount,
+                paymentMethod: "Paid via Razorpay",
+            });
+        } catch (emailError) {
+            console.error("❌ Order email failed:", emailError.message);
+        }
 
         return res.status(200).json({
             success: true,

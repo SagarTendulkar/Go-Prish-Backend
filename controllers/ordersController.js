@@ -2,6 +2,7 @@
 const Product = require("../models/product")
 const Order = require("../models/orderModal");
 const Category = require("../models/category");
+const sendOrderConfirmationEmail = require("../utils/orderConfirmationEmail");
 
 const createOrder = async (req, res) => {
     const userId = req.user.id; // ✅ from JWT
@@ -12,6 +13,16 @@ const createOrder = async (req, res) => {
         const order = new Order({ userId, name, email, phone, address, cart, totalAmount });
         const savedOrder = await order.save();
 
+        // 2️⃣ Send order confirmation email
+        try {
+            await sendOrderConfirmationEmail({
+                order: savedOrder,
+                name, email, phone, address, cart, totalAmount,
+                paymentMethod: "Cash on Delivery",
+            });
+        } catch (emailError) {
+            console.error("❌ Order email failed:", emailError.message);
+        }
 
         res.status(201).json({
             message: "Order placed successfully & stock updated",

@@ -2,7 +2,8 @@ const Product = require("../models/product");
 
 const addReview = async (req, res) => {
     const { id } = req.params; // product id
-    const { userId, name, rating, comment } = req.body;
+    const userId = req.user.id;
+    const { name, rating, comment } = req.body;
 
     try {
         const product = await Product.findById(id);

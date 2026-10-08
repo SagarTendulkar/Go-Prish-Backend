@@ -11,6 +11,8 @@ const {
     getFeaturedProducts,
 } = require("../controllers/productController");
 const { addReview, getReviews } = require("../controllers/reviewController");
+const { verifyToken } = require("../controllers/authController.js");
+
 
 router.get("/by-slug/:slug", getProductsBySlug);
 
@@ -22,7 +24,7 @@ router.post("/", createProduct);
 router.get("/:id", getProductById);
 router.put("/:id", updateProduct);
 router.delete("/:id", deleteProduct);
-router.post("/:id/reviews", addReview);
+router.post("/:id/reviews", verifyToken, addReview);
 router.get("/:id/reviews", getReviews);
 
 module.exports = router;
